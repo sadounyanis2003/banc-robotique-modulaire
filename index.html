@@ -1,0 +1,854 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Banc robotique modulaire</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Inter+Tight:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  /* Une page, un sujet : en-tête court, puis le schéma interactif en pleine largeur.
+     Jaune = ce qui varie · noir = formats communs stables · hachuré = fixe. Thème clair unique pour la projection. */
+  :root {
+    color-scheme: light;
+    --ink: #0a0a0b;
+    --ink-3: #1f1f22;
+    --paper: #ffffff;
+    --mist: #f5f5f2;
+    --line: #e3e3dd;
+    --line-dark: #2a2a2e;
+    --muted: #63635d;
+    --muted-dark: #9d9d96;
+    --yellow: #ffcc00;
+    --alert: #e0531f;
+    --alert-soft: #fdebe2;
+    --ok: #1f8a4c;
+    --font-logo: "Barlow Condensed", "Arial Narrow", sans-serif;
+    --font-display: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
+    --font-body: "Inter", "Helvetica Neue", Arial, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+    --max: 1320px;
+    --r: 18px;
+    --ease: cubic-bezier(.2, .7, .1, 1);
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; background: var(--mist); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  h1, h2, h3, h4 { font-family: var(--font-display); margin: 0; line-height: 1.08; text-wrap: balance; letter-spacing: -0.02em; }
+  p { margin: 0; }
+  button { font: inherit; color: inherit; }
+  :focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; border-radius: 6px; }
+  .inner { max-width: var(--max); margin: 0 auto; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+
+  /* Logo Groupe Renault en typographie vectorielle */
+  .logo { display: inline-grid; font-family: var(--font-logo); font-weight: 700; text-transform: uppercase; line-height: .86; letter-spacing: .005em; }
+  .logo .l1 { color: var(--yellow); }
+  .logo .l2 { color: var(--paper); }
+
+  /* En-tête */
+  .hero { background: var(--ink); color: var(--paper); position: relative; overflow: hidden; isolation: isolate; }
+  .hero::before { content: ""; position: absolute; inset: 0; z-index: -2; background-image: radial-gradient(rgba(255, 255, 255, .07) 1px, transparent 1px); background-size: 24px 24px; mask-image: radial-gradient(ellipse at 80% 50%, #000 15%, transparent 70%); -webkit-mask-image: radial-gradient(ellipse at 80% 50%, #000 15%, transparent 70%); }
+  .frames { position: absolute; z-index: -1; right: 2%; top: 50%; width: 560px; height: 320px; transform: translateY(-50%); pointer-events: none; }
+  .frames i { position: absolute; inset: 0; border: 1.5px solid rgba(255, 204, 0, .5); border-radius: 4px; opacity: 0; animation: tunnel 8s linear infinite; }
+  .frames i:nth-child(2) { animation-delay: -1.6s; } .frames i:nth-child(3) { animation-delay: -3.2s; }
+  .frames i:nth-child(4) { animation-delay: -4.8s; } .frames i:nth-child(5) { animation-delay: -6.4s; }
+  @keyframes tunnel { 0% { transform: scale(.15); opacity: 0; } 15% { opacity: .5; } 70% { opacity: .15; } 100% { transform: scale(1.5); opacity: 0; } }
+  .topbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-block: 16px; border-bottom: 1px solid rgba(255, 255, 255, .08); }
+  .topbar .logo { font-size: 21px; }
+  .topbar .who { font-size: 13.5px; color: var(--muted-dark); text-align: right; }
+  .topbar .who b { color: var(--paper); font-weight: 600; }
+  .hero-main { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 48px; align-items: end; padding-block: 36px 34px; }
+  .hero h1 { font-size: clamp(32px, 3.6vw, 48px); font-weight: 800; letter-spacing: -0.035em; line-height: 1; }
+  .hero h1 .ln { display: block; overflow: hidden; padding-bottom: .05em; }
+  .hero h1 .ln > span { display: inline-block; animation: rise .9s var(--ease) both; }
+  .hero h1 .ln:nth-child(2) > span { animation-delay: .1s; }
+  .hero h1 em { font-style: normal; color: var(--yellow); }
+  @keyframes rise { from { transform: translateY(105%); } to { transform: none; } }
+  .goals { margin-top: 20px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 28px; max-width: 800px; animation: fadeUp .8s var(--ease) .3s both; }
+  .goal { display: grid; gap: 6px; align-content: start; padding-left: 14px; border-left: 3px solid var(--yellow); }
+  .goal .gk { font-family: var(--font-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--yellow); }
+  .goal p { font-size: 15px; line-height: 1.5; color: #d6d6d0; }
+  @media (max-width: 620px) { .goals { grid-template-columns: minmax(0, 1fr); } }
+  @keyframes fadeUp { from { opacity: .001; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  .stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-left: 1px solid var(--line-dark); animation: fadeUp .8s var(--ease) .45s both; }
+  .stat { padding: 4px 20px; display: grid; gap: 4px; border-right: 1px solid var(--line-dark); }
+  .stat:last-child { border-right: 0; }
+  .stat .num { white-space: nowrap; font-family: var(--font-display); font-weight: 800; font-size: clamp(26px, 3vw, 42px); line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -0.03em; }
+  .stat .num .u { color: var(--yellow); }
+  .stat .lbl { color: var(--muted-dark); font-size: 13.5px; line-height: 1.35; }
+
+  /* Bandeau photo : le banc en images */
+  .tour { position: relative; background: var(--ink); color: var(--paper); overflow: hidden; isolation: isolate; padding-block: 44px 54px; border-top: 1px solid rgba(255, 255, 255, .08); }
+  .tour-bg { position: absolute; inset: -6%; z-index: -3; background: url("img/setup-complet.jpg") center 40% / cover no-repeat; filter: blur(3px) saturate(.75); animation: kenburns 30s ease-in-out infinite alternate; will-change: transform; }
+  @keyframes kenburns { from { transform: scale(1) translate(0, 0); } to { transform: scale(1.14) translate(-2.5%, 1.5%); } }
+  .tour::before { content: ""; position: absolute; inset: 0; z-index: -2; background: linear-gradient(180deg, rgba(10, 10, 11, .95) 0%, rgba(10, 10, 11, .76) 40%, rgba(10, 10, 11, .93) 100%); }
+  .ghost { position: absolute; z-index: -1; left: 0; top: 96px; display: flex; width: max-content; animation: reel 70s linear infinite reverse; pointer-events: none; }
+  .ghost span { font-family: var(--font-display); font-weight: 800; font-size: clamp(90px, 13vw, 190px); line-height: 1; letter-spacing: -0.04em; text-transform: uppercase; color: transparent; -webkit-text-stroke: 1.5px rgba(255, 255, 255, .13); padding-right: .5em; white-space: nowrap; }
+  .tour-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 12px 24px; margin-bottom: 26px; }
+  .tour-head h2 { font-size: clamp(28px, 3.2vw, 42px); font-weight: 800; }
+  .tour-head h2 em { font-style: normal; color: var(--yellow); }
+  .tour-head p { color: #cfcfc9; font-size: 14.5px; }
+  .tour .eyebrow { color: var(--muted-dark); margin-bottom: 10px; }
+  .reel-wrap { overflow: hidden; mask-image: linear-gradient(90deg, transparent 0, #000 5%, #000 95%, transparent 100%); -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 5%, #000 95%, transparent 100%); padding-block: 6px 30px; }
+  .reel { display: flex; align-items: flex-start; width: max-content; animation: reel 48s linear infinite; }
+  .reel-wrap:hover .reel, .reel:focus-within { animation-play-state: paused; }
+  @keyframes reel { to { transform: translateX(-50%); } }
+  .shot { position: relative; flex: none; width: clamp(270px, 31vw, 430px); aspect-ratio: 4 / 3; margin-right: 22px; padding: 0; border: 1px solid rgba(255, 255, 255, .16); border-radius: 22px; overflow: hidden; background: var(--ink-3); cursor: pointer; text-align: left; color: var(--paper); box-shadow: 0 30px 60px -25px rgba(0, 0, 0, .8); transition: border-color .35s, transform .5s var(--ease); }
+  .shot:nth-child(even) { margin-top: 24px; }
+  .shot:hover, .shot:focus-visible { border-color: var(--yellow); transform: translateY(-6px); }
+  .shot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 1.4s var(--ease); }
+  .shot:hover img { transform: scale(1.08); }
+  .shot::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10, 10, 11, 0) 40%, rgba(10, 10, 11, .88) 100%); }
+  .shot .tg { position: absolute; z-index: 1; top: 16px; left: 16px; font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .12em; padding: 5px 11px; border-radius: 999px; background: var(--yellow); color: var(--ink); }
+  .shot .tg.fx { background: rgba(255, 255, 255, .88); }
+  .shot .cap { position: absolute; z-index: 1; left: 20px; right: 20px; bottom: 18px; display: grid; gap: 4px; }
+  .shot .n { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: .14em; color: var(--yellow); }
+  .shot .big { font-family: var(--font-display); font-weight: 800; font-size: clamp(24px, 2.5vw, 34px); line-height: 1.02; letter-spacing: -0.025em; }
+  .shot .sm { font-size: 13.5px; line-height: 1.4; color: #d9d9d3; }
+  @media (prefers-reduced-motion: reduce) { .reel-wrap { overflow-x: auto; } .ghost { display: none; } }
+
+  /* Zone du schéma */
+  main { padding-block: 24px 56px; }
+  .controls { display: flex; flex-wrap: wrap; align-items: stretch; gap: 10px; margin-bottom: 14px; }
+  .group { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; padding: 9px 10px 10px; display: grid; gap: 7px; }
+  .group h2 { font-family: var(--font-mono); font-size: 11px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); padding-left: 4px; }
+  .group .btns { display: flex; flex-wrap: wrap; gap: 6px; }
+  .sc-btn { position: relative; overflow: hidden; isolation: isolate; border: 1.5px solid var(--ink); border-radius: 999px; background: var(--paper); padding: 8px 14px; cursor: pointer; font-weight: 600; font-size: 13.5px; transition: color .3s; white-space: nowrap; }
+  .sc-btn::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--ink); transform: translateY(101%); transition: transform .35s var(--ease); }
+  .sc-btn:hover, .sc-btn[aria-pressed="true"] { color: var(--paper); }
+  .sc-btn:hover::before, .sc-btn[aria-pressed="true"]::before { transform: none; }
+  .group.right { margin-left: auto; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .mode { position: relative; display: inline-grid; grid-template-columns: 1fr 1fr; border: 1.5px solid var(--ink); border-radius: 999px; padding: 3px; }
+  .mode .knob { position: absolute; top: 3px; bottom: 3px; left: 3px; width: calc(50% - 3px); border-radius: 999px; background: var(--yellow); transition: transform .45s var(--ease), background .45s; }
+  .mode.mono .knob { transform: translateX(100%); background: var(--alert); }
+  .mode button { position: relative; border: 0; background: transparent; padding: 6px 12px; cursor: pointer; font-size: 13px; font-weight: 600; white-space: nowrap; transition: color .3s; }
+  .mode.mono button[data-mode="mono"] { color: var(--paper); }
+  .play { border: 1.5px solid var(--ink); border-radius: 999px; background: var(--ink); color: var(--paper); padding: 8px 15px 8px 11px; cursor: pointer; font-size: 13px; font-weight: 600; display: inline-flex; gap: 7px; align-items: center; }
+  .play svg { width: 15px; height: 15px; }
+  .play[aria-pressed="true"] { background: var(--yellow); color: var(--ink); border-color: var(--yellow); }
+  .play-bar { height: 3px; background: var(--line); border-radius: 3px; overflow: hidden; margin-bottom: 14px; opacity: 0; transition: opacity .3s; }
+  .play-bar.on { opacity: 1; }
+  .play-bar i { display: block; height: 100%; width: 0; background: var(--ink); }
+
+  .arch { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; align-items: start; }
+  .diagram-box { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; box-shadow: 0 30px 60px -45px rgba(0, 0, 0, .35); }
+  .diagram-scroll { overflow-x: auto; }
+  .diagram-box svg { display: block; width: 100%; min-width: 760px; height: auto; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 22px; padding: 12px 20px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 8px; }
+  .legend .hint { margin-left: auto; font-style: italic; }
+  .sw { width: 14px; height: 14px; display: inline-block; border-radius: 4px; border: 1.5px solid var(--ink); }
+  .sw.swap { background: linear-gradient(90deg, var(--yellow) 0 34%, var(--paper) 34%); }
+  .sw.std { background: var(--ink); }
+  .sw.fixed { background: repeating-linear-gradient(45deg, #e2e2dc 0 3px, #fff 3px 6px); border-color: #8d8d87; }
+
+  /* SVG */
+  .lane { stroke: var(--line); }
+  .lane.l-inf { fill: #fafaf8; }
+  .lane.l-learn { fill: #f6f9f4; }
+  .lane.l-eval { fill: #fbf9f1; }
+  .lane-lbl { font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em; fill: #8d8d87; }
+  .node { cursor: pointer; transition: opacity .45s var(--ease); transform-box: fill-box; transform-origin: center; }
+  .node rect.box { fill: var(--paper); stroke: #a2a29c; stroke-width: 1.2; transition: fill .35s, stroke .35s, stroke-width .35s; }
+  .node rect.halo { fill: none; stroke: var(--yellow); stroke-width: 0; opacity: 0; }
+  .node .bar2 { fill: var(--yellow); transition: fill .35s; }
+  .node .kind { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .12em; fill: #8d8d87; }
+  .node .ttl { font-family: var(--font-display); font-weight: 700; font-size: 15px; fill: var(--ink); letter-spacing: -0.01em; }
+  .node .sub { font-family: var(--font-body); font-size: 11.5px; fill: var(--muted); }
+  .node.kind-swap rect.box { stroke: var(--ink); }
+  .node.kind-std rect.box { fill: var(--ink); stroke: var(--ink); }
+  .node.kind-std .ttl { fill: var(--paper); }
+  .node.kind-std .sub, .node.kind-std .kind { fill: #b4b4ad; }
+  .node.kind-fixed rect.box { fill: url(#hatch); stroke: #8d8d87; }
+  .node:hover rect.box, .node:focus-visible rect.box { stroke-width: 2.4; }
+  .node:focus { outline: none; }
+  .node.selected rect.box { stroke: var(--ink); stroke-width: 3; }
+  .node.is-dim { opacity: .18; }
+  .node.is-changed rect.box { fill: var(--yellow); stroke: var(--ink); stroke-width: 2.4; }
+  .node.is-changed rect.halo { animation: ring 1.8s ease-out infinite; }
+  @keyframes ring { 0% { stroke-width: 2; opacity: .9; } 100% { stroke-width: 26; opacity: 0; } }
+  .node.is-changed .ttl { fill: var(--ink); }
+  .node.is-changed .sub, .node.is-changed .kind { fill: #4a3d00; }
+  .node.is-changed .bar2 { fill: var(--ink); }
+  .node.is-cascade rect.box { fill: var(--alert-soft); stroke: var(--alert); stroke-width: 2.2; stroke-dasharray: 6 4; }
+  .node.is-cascade .ttl { fill: #7a2604; }
+  .node.is-cascade .sub, .node.is-cascade .kind { fill: #9a4a26; }
+  .node.is-cascade .bar2 { fill: var(--alert); }
+  .node.shake { animation: shake .5s ease-in-out; }
+  @keyframes shake { 20% { transform: translateX(-5px) rotate(-1deg); } 40% { transform: translateX(5px) rotate(1deg); } 60% { transform: translateX(-3px); } 80% { transform: translateX(2px); } }
+  .tag { transform-box: fill-box; transform-origin: center; }
+  .tag.pop { animation: pop .45s var(--ease); }
+  @keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: none; opacity: 1; } }
+  .tag-bg { fill: var(--ink); }
+  .tag-tx { font-family: var(--font-mono); font-size: 9.5px; font-weight: 500; letter-spacing: .1em; fill: var(--paper); }
+  .tag.t-changed .tag-tx { fill: var(--yellow); }
+  .tag.t-fixed .tag-bg { fill: #6b6b66; }
+  .tag.t-measured .tag-bg { fill: var(--ok); }
+  .tag.t-cascade .tag-bg { fill: var(--alert); }
+  .edge { fill: none; stroke: #bcbcb5; stroke-width: 1.6; transition: stroke .35s, opacity .35s; }
+  .edge.is-dim { opacity: .2; }
+  .edge.on { stroke: var(--ink); stroke-width: 2.2; }
+  .edge.on.cascade { stroke: var(--alert); }
+  .packet { fill: var(--yellow); stroke: var(--ink); stroke-width: 1.5; }
+  .packet.x { fill: var(--alert); stroke: #fff; }
+  .elbl rect { fill: var(--paper); }
+  .elbl text { font-family: var(--font-mono); font-size: 10.5px; fill: var(--muted); }
+
+  /* Panneau */
+  .side { display: grid; gap: 16px; position: sticky; top: 16px; }
+  .panel { border-radius: var(--r); background: var(--paper); border: 1px solid var(--line); overflow: hidden; display: grid; box-shadow: 0 30px 60px -45px rgba(0, 0, 0, .4); }
+  .panel-head { background: var(--ink); color: var(--paper); padding: 20px; display: grid; gap: 8px; }
+  .panel-head .k { font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em; color: var(--yellow); text-transform: uppercase; }
+  .panel-head h3 { font-size: 19px; font-weight: 700; line-height: 1.28; }
+  .panel-body { padding: 18px 20px 20px; display: grid; gap: 16px; }
+  .panel-body > * { animation: fadeUp .45s var(--ease) both; }
+  .panel-body > *:nth-child(2) { animation-delay: .05s; } .panel-body > *:nth-child(3) { animation-delay: .1s; } .panel-body > *:nth-child(4) { animation-delay: .15s; }
+  .pb-sec { display: grid; gap: 8px; }
+  .pb-sec h4 { font-family: var(--font-mono); font-size: 11px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .varies { background: var(--yellow); padding: 10px 12px; border-radius: 10px; font-weight: 600; font-size: 14.5px; line-height: 1.4; }
+  .pb-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 14px; }
+  .pb-list li { display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: 8px; align-items: start; line-height: 1.4; }
+  .pb-list li::before { content: ""; width: 10px; height: 10px; margin-top: 4px; border-radius: 3px; }
+  .pb-list.fixed li::before { background: repeating-linear-gradient(45deg, #8d8d87 0 2px, #fff 2px 4px); border: 1px solid #8d8d87; }
+  .pb-list.measure li::before { background: var(--ok); border-radius: 50%; }
+  .counter { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .counter > div { background: var(--mist); border-radius: 12px; padding: 12px 14px; display: grid; gap: 2px; }
+  .counter .big { font-family: var(--font-display); font-weight: 800; font-size: 34px; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -0.03em; transition: color .4s; }
+  .counter .small { font-size: 12.5px; color: var(--muted); line-height: 1.35; }
+  .counter .big.bad { color: var(--alert); }
+  .warn { background: var(--alert-soft); border-radius: 10px; border-left: 4px solid var(--alert); padding: 11px 13px; font-size: 13.5px; line-height: 1.5; color: #5c1f04; }
+  .note { font-size: 14px; color: var(--muted); line-height: 1.55; }
+  .note b { color: var(--ink); }
+  .node-detail { border-radius: var(--r); border: 1px solid var(--line); background: var(--paper); padding: 16px 18px; display: grid; gap: 6px; }
+  .node-detail > * { animation: fadeUp .4s var(--ease) both; }
+  .nd-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .nd-kind { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; padding: 4px 9px; border-radius: 999px; background: var(--ink); color: var(--paper); white-space: nowrap; }
+  .nd-kind.swap { background: var(--yellow); color: var(--ink); }
+  .nd-kind.fixed { background: #6b6b66; }
+  .nd-kind.proc { background: var(--mist); color: var(--ink); }
+  .node-detail h4 { font-size: 17px; font-weight: 700; }
+  .node-detail p { color: var(--muted); font-size: 14px; }
+  .opts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+  .opts span { font-size: 12.5px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--mist); }
+
+  .kchips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .kchip { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; padding: 4px 10px 4px 4px; border-radius: 999px; background: var(--mist); border: 1px solid var(--line); text-decoration: none; color: var(--ink); transition: border-color .2s, background .2s; }
+  .kchip:hover { border-color: var(--ink); background: var(--paper); }
+  .kchip b, .kcode { font-family: var(--font-mono); font-size: 11px; font-weight: 500; padding: 2px 7px; border-radius: 999px; background: var(--ink); color: var(--yellow); }
+
+  /* KPI */
+  .kpi { padding-block: 64px 80px; background: var(--paper); border-top: 1px solid var(--line); }
+  .kpi-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 20px; margin-bottom: 28px; }
+  .kpi-head .t { display: grid; gap: 10px; max-width: 720px; }
+  .eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); display: inline-flex; align-items: center; gap: 12px; }
+  .eyebrow::before { content: ""; width: 28px; height: 3px; background: var(--yellow); border-radius: 2px; }
+  .kpi-head h2 { font-size: clamp(30px, 3.6vw, 44px); font-weight: 800; }
+  .kpi-head p { color: var(--muted); font-size: 17px; }
+  .filters { display: inline-flex; background: var(--mist); border: 1px solid var(--line); border-radius: 999px; padding: 4px; gap: 2px; }
+  .filters button { border: 0; background: transparent; border-radius: 999px; padding: 8px 16px; cursor: pointer; font-size: 13.5px; font-weight: 600; color: var(--muted); transition: background .25s, color .25s; }
+  .filters button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+  .kpi-table { border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+  .kpi-row { display: grid; grid-template-columns: 76px minmax(0, 1.1fr) minmax(0, 1.6fr) minmax(0, 1.2fr) minmax(0, 1.1fr); gap: 20px; padding: 18px 22px; border-top: 1px solid var(--line); align-items: start; transition: background .25s, opacity .3s; }
+  .kpi-row:first-child { border-top: 0; }
+  .kpi-row.th { background: var(--ink); color: var(--muted-dark); font-family: var(--font-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; padding-block: 13px; }
+  .kpi-row:not(.th):hover { background: #fcfbf5; }
+  .kpi-row.flash { animation: flash 1.6s var(--ease); }
+  @keyframes flash { 0%, 40% { background: #fff4c2; } 100% { background: transparent; } }
+  .kpi-row[hidden] { display: none; }
+  .kpi-row .nm { display: grid; gap: 4px; }
+  .kpi-row .nm strong { font-family: var(--font-display); font-size: 16.5px; font-weight: 700; letter-spacing: -0.01em; }
+  .kpi-row .nm .fam { font-size: 12px; color: var(--muted); }
+  .kpi-row .df { font-size: 14px; color: #33332f; line-height: 1.5; }
+  .kpi-row .ms { font-size: 13.5px; color: var(--muted); line-height: 1.5; }
+  .kpi-row .ms .u { display: inline-block; font-family: var(--font-mono); font-size: 12px; color: var(--ink); background: var(--mist); border-radius: 6px; padding: 1px 7px; margin-bottom: 4px; }
+  .role-tag { justify-self: start; font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+  .role-tag.r-elim { background: var(--alert-soft); color: #9a3412; }
+  .role-tag.r-main { background: var(--ink); color: var(--yellow); }
+  .role-tag.r-sec { background: var(--mist); color: var(--muted); border: 1px solid var(--line); }
+  .rl { display: grid; gap: 6px; }
+  .rl .rt { font-size: 13px; color: var(--muted); line-height: 1.45; }
+
+  .rules { margin-top: 28px; display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 16px; }
+  .rule-card { border-radius: var(--r); padding: 26px; display: grid; gap: 16px; align-content: start; }
+  .rule-card.dark { background: var(--ink); color: var(--paper); }
+  .rule-card.light { background: var(--mist); }
+  .rule-card h3 { font-size: 22px; font-weight: 700; }
+  .steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; counter-reset: s; }
+  .steps li { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 12px; align-items: start; counter-increment: s; }
+  .steps li::before { content: counter(s); width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; background: var(--yellow); color: var(--ink); }
+  .steps b { display: block; font-family: var(--font-display); font-size: 16px; }
+  .steps span { font-size: 14px; color: #c4c4be; }
+  .checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; font-size: 14.5px; }
+  .checks li { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 10px; line-height: 1.45; }
+  .checks li::before { content: ""; width: 18px; height: 18px; margin-top: 1px; border-radius: 5px; background: var(--ink) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffcc00' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5 9-10'/%3E%3C/svg%3E") center / 12px no-repeat; }
+  @media (max-width: 980px) {
+    .kpi-row { grid-template-columns: 60px minmax(0, 1fr); }
+    .kpi-row.th { display: none; }
+    .kpi-row .df, .kpi-row .ms, .kpi-row .rl { grid-column: 2; }
+    .rules { grid-template-columns: minmax(0, 1fr); }
+  }
+
+  footer { background: var(--ink); color: var(--muted-dark); padding-block: 28px; font-size: 13px; }
+  footer .inner { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; }
+  footer .logo { font-size: 26px; }
+  footer b { color: var(--paper); font-weight: 600; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+    .frames { display: none; }
+  }
+  @media (max-width: 1080px) {
+    .arch { grid-template-columns: minmax(0, 1fr); }
+    .side { position: static; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
+    .group.right { margin-left: 0; }
+  }
+  @media (max-width: 820px) {
+    .hero-main { grid-template-columns: minmax(0, 1fr); padding-block: 36px; }
+    .side { grid-template-columns: minmax(0, 1fr); }
+    .frames { width: 380px; height: 220px; right: -30%; top: 35%; }
+    .topbar .who { display: none; }
+    .legend .hint { margin-left: 0; }
+  }
+  @media (max-width: 480px) {
+    .stats { grid-template-columns: minmax(0, 1fr); border-left: 0; }
+    .stat { border-right: 0; border-bottom: 1px solid var(--line-dark); padding: 12px 0; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="frames" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="inner">
+    <div class="topbar">
+      <span class="logo" aria-label="Groupe Renault"><span class="l1">Groupe</span><span class="l2">Renault</span></span>
+      <span class="who">Conçu par <b>Yanis Sadoun</b> et <b>Hakan Taspinar</b></span>
+    </div>
+    <div class="hero-main">
+      <div>
+        <h1><span class="ln"><span>Un banc pour évaluer et pour apprendre.</span></span><span class="ln"><span><em>On change une brique, sans toucher au reste.</em></span></span></h1>
+        <div class="goals">
+          <div class="goal"><span class="gk">Évaluer</span><p>Quand une entreprise nous apporte un modèle ou un équipement, nous le testons vite et à périmètre constant. Exemple : changer les caméras sans toucher au modèle, pour savoir ce qui fait vraiment la différence.</p></div>
+          <div class="goal"><span class="gk">Apprendre</span><p>Entraîner un robot prend aujourd'hui 6 mois en moyenne, car les données sont collectées par téléopération classique. Le banc compare d'autres moyens de collecte pour réduire ce délai.</p></div>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat"><span class="num">6<span class="u"> mois</span></span><span class="lbl">en moyenne pour entraîner un robot aujourd'hui</span></div>
+        <div class="stat"><span class="num">1</span><span class="lbl">seul facteur changé par expérience</span></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="tour" aria-label="Le banc en images">
+  <div class="tour-bg" aria-hidden="true"></div>
+  <div class="ghost" aria-hidden="true" id="ghost"></div>
+  <div class="inner">
+    <div class="tour-head">
+      <div>
+        <span class="eyebrow">Le banc, en vrai</span>
+        <h2>Quatre éléments physiques, <em>un seul banc.</em></h2>
+      </div>
+      <p>Cliquez sur une image pour la retrouver dans le schéma.</p>
+    </div>
+  </div>
+  <div class="reel-wrap"><div class="reel" id="reel"></div></div>
+</section>
+
+<main id="schema">
+  <div class="inner">
+    <div class="controls">
+      <div class="group">
+        <h2>Évaluer une solution</h2>
+        <div class="btns">
+          <button class="sc-btn" data-sc="camera" aria-pressed="false">Changer de caméra</button>
+          <button class="sc-btn" data-sc="vla" aria-pressed="false">Tester un VLA externe</button>
+        </div>
+      </div>
+      <div class="group">
+        <h2>Améliorer l'apprentissage</h2>
+        <div class="btns">
+          <button class="sc-btn" data-sc="collect" aria-pressed="false">Changer de moyen de collecte</button>
+          <button class="sc-btn" data-sc="train" aria-pressed="false">Entraîner un autre modèle</button>
+        </div>
+      </div>
+      <div class="group right">
+        <h2>Comparer</h2>
+        <div class="row">
+          <div class="mode" id="modeSw" role="group" aria-label="Type d'architecture">
+            <span class="knob" aria-hidden="true"></span>
+            <button data-mode="mod" aria-pressed="true">Modulaire</button>
+            <button data-mode="mono" aria-pressed="false">Non modulaire</button>
+          </div>
+          <button class="play" id="play" aria-pressed="false"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg><span>Lecture auto</span></button>
+        </div>
+      </div>
+    </div>
+    <div class="play-bar" id="playBar"><i></i></div>
+
+    <div class="arch">
+      <div class="diagram-box">
+        <div class="diagram-scroll"><svg id="diagram" viewBox="0 0 1100 625" role="img" aria-label="Schéma des briques du banc et de leurs liens"></svg></div>
+        <div class="legend">
+          <span><i class="sw swap"></i>Interchangeable</span>
+          <span><i class="sw std"></i>Format commun, ne change jamais</span>
+          <span><i class="sw fixed"></i>Fixe pour toutes les expériences</span>
+          <span class="hint">Cliquez sur un bloc pour le détail</span>
+        </div>
+      </div>
+      <div class="side">
+        <aside class="panel" id="panel" aria-live="polite"></aside>
+        <div class="node-detail" id="nodeDetail" aria-live="polite" hidden></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<section class="kpi" id="kpi">
+  <div class="inner">
+    <div class="kpi-head">
+      <div class="t">
+        <span class="eyebrow">Critères de validation</span>
+        <h2>Sur quoi nous validons</h2>
+        <p>Onze indicateurs, définis avant le premier essai. Chacun a une définition, une unité, une méthode de mesure et un rôle dans la décision.</p>
+      </div>
+      <div class="filters" role="group" aria-label="Filtrer les indicateurs">
+        <button data-f="all" aria-pressed="true">Tous</button>
+        <button data-f="eval" aria-pressed="false">Évaluer une solution</button>
+        <button data-f="learn" aria-pressed="false">Améliorer l'apprentissage</button>
+      </div>
+    </div>
+    <div class="kpi-table" id="kpiTable">
+      <div class="kpi-row th"><span>Code</span><span>Indicateur</span><span>Définition</span><span>Mesure</span><span>Rôle dans la décision</span></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="inner">
+    <span class="logo" aria-label="Groupe Renault"><span class="l1">Groupe</span><span class="l2">Renault</span></span>
+    <span>Banc robotique modulaire · <b>Yanis Sadoun</b> &amp; <b>Hakan Taspinar</b> · Novembre 2026</span>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const NS = "http://www.w3.org/2000/svg";
+  const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const el = (tag, attrs = {}, parent) => {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(n);
+    return n;
+  };
+  const esc = s => s.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+
+  /* ---------- Blocs du banc ---------- */
+  const COLS = [30, 245, 460, 675, 890], W = 186, H = 76;
+  const KIND_LBL = { swap: "INTERCHANGEABLE", std: "FORMAT COMMUN", fixed: "FIXE", proc: "ÉTAPE" };
+  const KIND_TXT = { swap: "Interchangeable", std: "Format commun", fixed: "Fixe", proc: "Étape" };
+  const N = {
+    cam:    { c: 0, y: 52,  t: "Caméras", s: "poignet · face", k: "swap",
+              d: "Ce que voit le modèle. Le modèle demande un rôle (poignet, face), le banc y relie une caméra physique.",
+              o: ["Orbbec Gemini 335Lg", "Orbbec Femto Bolt", "RealSense D455", "Caméra fournisseur"] },
+    obs:    { c: 1, y: 52,  t: "Format d'observation", s: "images + état du robot", k: "std",
+              d: "Images datées par rôle et état mesuré du robot. Tout ce qui est en amont peut changer : le modèle reçoit toujours la même chose." },
+    model:  { c: 2, y: 52,  t: "Modèle IA", s: "VLA · VLM · interne/externe", k: "swap",
+              d: "La politique qui décide du geste. Elle tourne dans son propre environnement et ne parle au robot qu'à travers le format de commande.",
+              o: ["SmolVLA", "ACT", "GR00T N1.7", "VLA / VLM externe", "Module de vision"] },
+    cmd:    { c: 3, y: 132, t: "Format de commande", s: "déplacement + préhension", k: "std",
+              d: "Vitesse de déplacement de l'outil et consigne d'ouverture du préhenseur. Humain ou modèle, la sortie a la même forme." },
+    safety: { c: 4, y: 52,  t: "Sécurité", s: "limites · pause · arrêt", k: "fixed",
+              d: "Limites de vitesse et d'espace, pause, arrêt. Identique pour toutes les expériences : la sécurité n'est jamais une variable." },
+    tele:   { c: 0, y: 212, t: "Moyen de collecte", s: "ROS · VIVE · vision mains", k: "swap",
+              d: "Comment l'opérateur transmet son geste au robot. Ajouter un moyen revient à ajouter une source au même format.",
+              o: ["Téléopération ROS", "Trackers VIVE", "Vision des mains", "Démonstration à la main", "Bras maître (piste)"] },
+    human:  { c: 1, y: 212, t: "Opérateur", s: "réalise la tâche", k: "proc",
+              d: "L'opérateur exécute la tâche à travers le moyen de collecte choisi. Ses démonstrations deviennent les données d'apprentissage." },
+    robot:  { c: 4, y: 212, t: "Robot + préhenseur", s: "UR18 · main · pince", k: "swap",
+              d: "Bras UR18 équipé d'un préhenseur interchangeable, chacun avec son profil déclaré.",
+              o: ["Main Inspire 6 axes", "Pince OnRobot 2FG7", "Autre préhenseur"] },
+    data:   { c: 1, y: 382, t: "Démonstrations", s: "format standard + origine", k: "std",
+              d: "Épisodes au format LeRobot. Chaque épisode garde son origine (moyen de collecte, caméras, préhenseur). Un mélange non voulu est refusé." },
+    train:  { c: 2, y: 382, t: "Entraînement", s: "architecture du modèle", k: "swap",
+              d: "L'architecture entraînée sur les démonstrations. Elle se change sans toucher aux données ni au protocole d'essai.",
+              o: ["ACT", "SmolVLA", "GR00T N1.7", "Nouvelle architecture"] },
+    recipe: { c: 2, y: 520, t: "Recette figée", s: "hyperparamètres · graines", k: "fixed",
+              d: "Budget de calcul, nombre de pas et graines fixés : quand on compare deux jeux de données, seule la donnée change." },
+    proto:  { c: 3, y: 382, t: "Protocole d'essai", s: "tâches · positions · N essais", k: "fixed",
+              d: "Tâches, positions de départ, nombre d'essais et critères de succès fixés avant l'essai, ordre tiré au hasard." },
+    eval:   { c: 4, y: 382, t: "Essais physiques", s: "sur le robot réel", k: "proc",
+              d: "Chaque essai est tracé : commandes, mesures, résultat physique observé." },
+    report: { c: 4, y: 520, t: "Comparaison", s: "référence vs variante", k: "proc",
+              d: "Écart entre la référence et la variante, avec intervalle de confiance. La conclusion porte sur un seul facteur." }
+  };
+  const IDS = Object.keys(N);
+  const E = [
+    ["cam", "obs"], ["obs", "model"], ["model", "cmd"], ["cmd", "safety"], ["safety", "robot"],
+    ["tele", "human"], ["human", "cmd"], ["human", "data", "épisodes"], ["data", "train"],
+    ["recipe", "train"], ["train", "model", "nouveaux poids"], ["robot", "eval", "résultat"],
+    ["proto", "eval"], ["eval", "report"]
+  ];
+  const INFER = ["cam-obs", "obs-model", "model-cmd", "cmd-safety", "safety-robot", "robot-eval", "proto-eval", "eval-report"];
+  const S = {
+    overview: { k: "Vue d'ensemble", q: "Des briques interchangeables, reliées par trois formats communs qui ne changent jamais.", changed: [], edges: [], fixed: [], measured: [], cascade: [] },
+    camera: {
+      k: "Évaluer · Matériel", q: "Une autre caméra améliore-t-elle la réussite du modèle actuel ?",
+      varies: "La caméra de face, remplacée par une caméra candidate.",
+      changed: ["cam"], edges: INFER, fixed: ["model", "robot", "safety", "proto"], measured: ["eval", "report"],
+      fixedTxt: ["Le modèle et ses poids", "Le robot et la sécurité", "Les tâches et le nombre d'essais"],
+      measures: ["K1", "K4", "K5", "K6"],
+      cascade: ["obs", "model", "train", "data", "proto"],
+      mono: "La nouvelle caméra change la forme des images : il faut adapter et souvent réentraîner le modèle. L'écart mesuré mélange l'effet de la caméra et celui du réentraînement."
+    },
+    vla: {
+      k: "Évaluer · Logiciel", q: "Le VLA d'un fournisseur fait-il mieux que notre modèle de référence ?",
+      varies: "Le modèle : SmolVLA remplacé par le VLA du fournisseur.",
+      changed: ["model"], edges: INFER, fixed: ["cam", "robot", "safety", "proto"], measured: ["eval", "report"],
+      fixedTxt: ["Les caméras et leurs réglages", "Le robot et la sécurité", "Le même protocole que la référence"],
+      measures: ["K1", "K2", "K3", "K4", "K5", "K6", "K7"],
+      cascade: ["cam", "obs", "cmd", "safety", "robot", "proto"],
+      mono: "Chaque fournisseur arrive avec ses caméras, son format d'action, parfois son contrôleur. Chaque test devient un projet, et deux fournisseurs ne sont jamais comparés dans les mêmes conditions."
+    },
+    collect: {
+      k: "Apprendre · Données", q: "Les trackers VIVE donnent-ils de meilleures démonstrations que la téléopération ROS ?",
+      varies: "Le moyen de collecte : téléopération ROS remplacée par les trackers VIVE.",
+      changed: ["tele"],
+      edges: ["tele-human", "human-cmd", "cmd-safety", "safety-robot", "human-data", "data-train", "recipe-train", "train-model", "model-cmd", "robot-eval", "proto-eval", "eval-report"],
+      fixed: ["cam", "robot", "safety", "recipe", "proto"], measured: ["human", "eval", "report"],
+      fixedTxt: ["La tâche et le nombre de démonstrations", "La recette d'entraînement", "Le protocole d'essai du modèle"],
+      measures: ["K8", "K9", "K10", "K11", "K1"],
+      cascade: ["human", "data", "train", "recipe", "cam"],
+      mono: "Chaque moyen de collecte produit son propre format : les données ne se mélangent pas et l'entraînement change avec elles. On compare des chaînes entières, pas des moyens de collecte."
+    },
+    train: {
+      k: "Apprendre · Modèle", q: "Sur les mêmes démonstrations, quelle architecture apprend le mieux ?",
+      varies: "L'architecture entraînée : ACT, SmolVLA ou GR00T.",
+      changed: ["train"],
+      edges: ["data-train", "recipe-train", "train-model", "model-cmd", "cmd-safety", "safety-robot", "robot-eval", "proto-eval", "eval-report"],
+      fixed: ["data", "recipe", "cam", "robot", "safety", "proto"], measured: ["eval", "report"],
+      fixedTxt: ["Les mêmes démonstrations", "Le même budget de calcul", "Le même protocole d'essai"],
+      measures: ["K1", "K4", "K10", "K5"],
+      cascade: ["data", "obs", "cmd", "model", "recipe"],
+      mono: "Chaque architecture impose sa conversion des données et son interface robot. Les modèles ne voient plus les mêmes exemples : la comparaison est biaisée."
+    }
+  };
+
+  /* ---------- Indicateurs de validation ---------- */
+  const KPI = [
+    { c: "K1", n: "Taux de réussite", fam: "Performance", g: ["eval", "learn"],
+      d: "Part des essais réussis. Un essai réussit si l'objet est saisi, transporté et déposé dans la zone cible sans chute ni intervention.",
+      u: "% · IC 95 % (Wilson)", m: "Comptage sur N essais par configuration, N calculé avant la campagne.", r: "main", rt: "Critère principal de décision." },
+    { c: "K2", n: "Durée de cycle", fam: "Performance", g: ["eval"],
+      d: "Temps entre le signal de départ et la dépose, sur les essais réussis.",
+      u: "s · médiane et écart interquartile", m: "Horodatage automatique des traces d'essai.", r: "sec", rt: "Ne doit pas se dégrader au-delà de la marge fixée." },
+    { c: "K3", n: "Interventions humaines", fam: "Autonomie", g: ["eval"],
+      d: "Pauses, reprises manuelles et repositionnements demandés à l'opérateur.",
+      u: "pour 100 essais", m: "Événements de pause et de reprise enregistrés par le banc.", r: "sec", rt: "Mesure le coût d'exploitation réel en usine." },
+    { c: "K4", n: "Robustesse", fam: "Généralisation", g: ["eval", "learn"],
+      d: "Taux de réussite sur des positions et des objets jamais vus, et sous éclairage modifié, rapporté au taux nominal.",
+      u: "ratio K1 hors distribution / K1 nominal", m: "Jeu de positions et d'objets réservé, jamais utilisé à l'entraînement.", r: "sec", rt: "Prédit le comportement sur une nouvelle cellule." },
+    { c: "K5", n: "Latence de décision", fam: "Intégration", g: ["eval", "learn"],
+      d: "Temps entre la date de l'image et l'envoi de la commande correspondante.",
+      u: "ms · 95e centile", m: "Dates originales conservées de bout en bout dans les traces.", r: "sec", rt: "Plafond fixé selon la vitesse de la tâche." },
+    { c: "K6", n: "Sécurité", fam: "Sécurité", g: ["eval"],
+      d: "Collisions, et déclenchements de la couche de sécurité (limites de vitesse ou d'espace, arrêts).",
+      u: "nombre · pour 100 essais", m: "Journal de la couche de sécurité, identique pour toutes les expériences.", r: "elim", rt: "Toute collision élimine la variante." },
+    { c: "K7", n: "Effort d'intégration", fam: "Intégration", g: ["eval"],
+      d: "Travail nécessaire pour brancher une solution externe sur les formats communs.",
+      u: "jours-personne", m: "Suivi du temps de l'adaptateur jusqu'au premier essai valide.", r: "sec", rt: "Compare le coût de déploiement des fournisseurs." },
+    { c: "K8", n: "Débit de collecte", fam: "Collecte", g: ["learn"],
+      d: "Démonstrations validées en revue, par heure d'opérateur.",
+      u: "démos / h", m: "Horodatage des épisodes et décisions de revue.", r: "main", rt: "Critère principal pour l'efficacité de la collecte." },
+    { c: "K9", n: "Taux de rejet", fam: "Collecte", g: ["learn"],
+      d: "Part des démonstrations écartées en revue : geste raté, données incomplètes, horloges incohérentes.",
+      u: "%", m: "Revue opérateur systématique, motif de rejet obligatoire.", r: "sec", rt: "Révèle la qualité réelle du moyen de collecte." },
+    { c: "K10", n: "Efficacité d'apprentissage", fam: "Apprentissage", g: ["learn"],
+      d: "Nombre de démonstrations nécessaires pour que le modèle atteigne le taux de réussite visé.",
+      u: "démos pour K1 ≥ seuil", m: "Entraînements sur au moins trois volumes croissants, même recette, évalués avec K1.", r: "main", rt: "Critère principal pour la performance d'apprentissage." },
+    { c: "K11", n: "Charge opérateur", fam: "Facteur humain", g: ["learn"],
+      d: "Effort mental et physique ressenti pendant la collecte.",
+      u: "score NASA-TLX · 0 à 100", m: "Questionnaire standard après chaque session de collecte.", r: "sec", rt: "Conditionne la collecte à grande échelle." }
+  ];
+  const KPI_BY = Object.fromEntries(KPI.map(k => [k.c, k]));
+  const ROLE = { main: "Principal", sec: "Secondaire", elim: "Éliminatoire" };
+  const kt = document.getElementById("kpiTable");
+  kt.insertAdjacentHTML("beforeend", KPI.map(k => `
+    <div class="kpi-row" id="kpi-${k.c}" data-g="${k.g.join(" ")}">
+      <span><span class="kcode">${k.c}</span></span>
+      <div class="nm"><strong>${esc(k.n)}</strong><span class="fam">${esc(k.fam)}</span></div>
+      <p class="df">${esc(k.d)}</p>
+      <div class="ms"><span class="u">${esc(k.u)}</span><br>${esc(k.m)}</div>
+      <div class="rl"><span class="role-tag r-${k.r}">${ROLE[k.r]}</span><span class="rt">${esc(k.rt)}</span></div>
+    </div>`).join(""));
+  document.querySelectorAll(".filters button").forEach(b => b.addEventListener("click", () => {
+    document.querySelectorAll(".filters button").forEach(x => x.setAttribute("aria-pressed", x === b));
+    kt.querySelectorAll(".kpi-row:not(.th)").forEach(r => { r.hidden = b.dataset.f !== "all" && !r.dataset.g.split(" ").includes(b.dataset.f); });
+  }));
+  document.addEventListener("click", e => {
+    const a = e.target.closest(".kchip"); if (!a) return;
+    e.preventDefault(); stopPlay();
+    const row = document.getElementById(`kpi-${a.dataset.k}`);
+    document.querySelector('.filters button[data-f="all"]').click();
+    row.scrollIntoView({ behavior: RM ? "auto" : "smooth", block: "center" });
+    row.classList.remove("flash"); void row.offsetWidth; row.classList.add("flash");
+  });
+
+  /* ---------- Construction du SVG ---------- */
+  const svg = document.getElementById("diagram");
+  const defs = el("defs", {}, svg);
+  const hatch = el("pattern", { id: "hatch", width: 7, height: 7, patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" }, defs);
+  el("rect", { width: 7, height: 7, fill: "#ffffff" }, hatch);
+  el("rect", { width: 2.2, height: 7, fill: "#e4e4de" }, hatch);
+  const mk = (id, color) => {
+    const m = el("marker", { id, viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto-start-reverse" }, defs);
+    el("path", { d: "M0,0 L10,5 L0,10 z", fill: color }, m);
+  };
+  mk("arr", "#bcbcb5"); mk("arrOn", "#0a0a0b"); mk("arrX", "#e0531f");
+  const shadow = el("filter", { id: "sh", x: "-20%", y: "-20%", width: "140%", height: "160%" }, defs);
+  el("feDropShadow", { dx: 0, dy: 6, stdDeviation: 7, "flood-color": "#000", "flood-opacity": 0.08 }, shadow);
+
+  [{ x: 15, y: 18, w: 1070, h: 290, l: "Exécution · le robot agit", c: "l-inf" },
+   { x: 15, y: 342, w: 645, h: 270, l: "Apprentissage", c: "l-learn" },
+   { x: 665, y: 342, w: 420, h: 270, l: "Évaluation", c: "l-eval" }].forEach(L => {
+    el("rect", { class: `lane ${L.c}`, x: L.x, y: L.y, width: L.w, height: L.h, rx: 14 }, svg);
+    el("text", { class: "lane-lbl", x: L.x + 16, y: L.y + 22 }, svg).textContent = L.l.toUpperCase();
+  });
+
+  const anchor = (n, side) => {
+    const x = COLS[n.c], y = n.y;
+    return side === "r" ? [x + W, y + H / 2] : side === "l" ? [x, y + H / 2] : side === "t" ? [x + W / 2, y] : [x + W / 2, y + H];
+  };
+  const edgeLayer = el("g", {}, svg), packetLayer = el("g", {}, svg), labelLayer = el("g", {}, svg), nodeLayer = el("g", {}, svg);
+  const edgeEls = {};
+  E.forEach(([a, b, lbl]) => {
+    const A = N[a], B = N[b];
+    let p, q, d;
+    if (B.c > A.c) {
+      p = anchor(A, "r"); q = anchor(B, "l"); q[0] -= 2;
+      const mx = (p[0] + q[0]) / 2;
+      d = `M${p[0]},${p[1]} C${mx},${p[1]} ${mx},${q[1]} ${q[0]},${q[1]}`;
+    } else {
+      if (B.y > A.y) { p = anchor(A, "b"); q = anchor(B, "t"); q[1] -= 2; }
+      else { p = anchor(A, "t"); q = anchor(B, "b"); q[1] += 2; }
+      d = `M${p[0]},${p[1]} L${q[0]},${q[1]}`;
+    }
+    const id = `e-${a}-${b}`;
+    edgeEls[`${a}-${b}`] = el("path", { class: "edge", id, d, "marker-end": "url(#arr)" }, edgeLayer);
+    if (lbl) {
+      const mx = (p[0] + q[0]) / 2, my = (p[1] + q[1]) / 2, tw = lbl.length * 6.6 + 14;
+      const g = el("g", { class: "elbl" }, labelLayer);
+      el("rect", { x: mx - tw / 2, y: my - 10, width: tw, height: 20, rx: 10 }, g);
+      el("text", { x: mx, y: my + 4, "text-anchor": "middle" }, g).textContent = lbl;
+    }
+  });
+
+  const nodeEls = {};
+  IDS.forEach(id => {
+    const n = N[id], x = COLS[n.c], y = n.y;
+    const g = el("g", { class: `node kind-${n.k}`, tabindex: 0, role: "button", "aria-label": `${n.t} : ${KIND_TXT[n.k]}` }, nodeLayer);
+    g.dataset.id = id;
+    el("rect", { class: "halo", x, y, width: W, height: H, rx: 12 }, g);
+    el("rect", { class: "box", x, y, width: W, height: H, rx: 12, filter: "url(#sh)" }, g);
+    if (n.k === "swap") el("rect", { class: "bar2", x: x + 10, y: y + 12, width: 4, height: H - 24, rx: 2 }, g);
+    const ox = n.k === "swap" ? 22 : 16;
+    el("text", { class: "kind", x: x + ox, y: y + 21 }, g).textContent = KIND_LBL[n.k];
+    el("text", { class: "ttl", x: x + ox, y: y + 44 }, g).textContent = n.t;
+    el("text", { class: "sub", x: x + ox, y: y + 62 }, g).textContent = n.s;
+    const tag = el("g", { class: "tag", visibility: "hidden" }, g);
+    const tbg = el("rect", { class: "tag-bg", y: y - 10, height: 20, rx: 10 }, tag);
+    const ttx = el("text", { class: "tag-tx", y: y + 4, "text-anchor": "middle" }, tag);
+    nodeEls[id] = { g, tag, tbg, ttx, x, last: null };
+    g.addEventListener("click", () => { stopPlay(); selectNode(id); });
+    g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); stopPlay(); selectNode(id); } });
+  });
+  IDS.forEach(id => { const t = nodeEls[id].g.querySelector(".ttl"); try { if (t.getBBox().width > W - 34) t.style.fontSize = "13.5px"; } catch (e) {} });
+
+  const setTag = (id, text, cls) => {
+    const ne = nodeEls[id];
+    if (!text) { ne.tag.setAttribute("visibility", "hidden"); ne.last = null; return; }
+    const w = text.length * 7 + 18;
+    ne.tbg.setAttribute("x", ne.x + W - w - 10); ne.tbg.setAttribute("width", w);
+    ne.ttx.setAttribute("x", ne.x + W - 10 - w / 2); ne.ttx.textContent = text;
+    ne.tag.setAttribute("class", `tag ${cls}`); ne.tag.setAttribute("visibility", "visible");
+    if (ne.last !== text && !RM) { void ne.tag.getBBox(); ne.tag.classList.add("pop"); }
+    ne.last = text;
+  };
+
+  /* ---------- État et rendu ---------- */
+  let cur = "overview", mode = "mod";
+  const panel = document.getElementById("panel");
+  const modeSw = document.getElementById("modeSw");
+
+  function apply(shakeIt) {
+    const s = S[cur], mono = mode === "mono" && cur !== "overview";
+    const active = new Set([...s.changed, ...s.fixed, ...s.measured]);
+    s.edges.forEach(k => k.split("-").forEach(i => active.add(i)));
+    const cascade = mono ? s.cascade : [];
+    cascade.forEach(i => active.add(i));
+
+    IDS.forEach(id => {
+      const g = nodeEls[id].g;
+      g.classList.remove("is-dim", "is-changed", "is-cascade");
+      let tag = null, cls = "";
+      if (cur !== "overview" && !active.has(id)) g.classList.add("is-dim");
+      if (s.changed.includes(id)) { g.classList.add("is-changed"); tag = "VARIE"; cls = "t-changed"; }
+      else if (cascade.includes(id)) {
+        g.classList.add("is-cascade"); tag = "À MODIFIER"; cls = "t-cascade";
+        if (shakeIt && !RM) { g.classList.remove("shake"); void g.getBBox(); g.classList.add("shake"); }
+      }
+      else if (s.measured.includes(id)) { tag = "MESURÉ"; cls = "t-measured"; }
+      else if (s.fixed.includes(id)) { tag = "FIXE"; cls = "t-fixed"; }
+      setTag(id, tag, cls);
+    });
+
+    packetLayer.innerHTML = "";
+    Object.entries(edgeEls).forEach(([k, p]) => {
+      const i = s.edges.indexOf(k);
+      p.classList.remove("on", "cascade", "is-dim");
+      if (i >= 0) {
+        const [a, b] = k.split("-");
+        const hit = mono && (cascade.includes(a) || cascade.includes(b));
+        p.classList.add("on"); if (hit) p.classList.add("cascade");
+        p.setAttribute("marker-end", hit ? "url(#arrX)" : "url(#arrOn)");
+        if (!RM) {
+          const dur = Math.max(0.9, p.getTotalLength() / 140);
+          const c = el("circle", { class: `packet${hit ? " x" : ""}`, r: 4.5, cx: -20 }, packetLayer);
+          const am = el("animateMotion", { dur: `${dur}s`, repeatCount: "indefinite", begin: `${(i * 0.18).toFixed(2)}s` }, c);
+          const mp = el("mpath", {}, am);
+          mp.setAttribute("href", `#${p.id}`);
+          mp.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", `#${p.id}`);
+        }
+      } else {
+        p.setAttribute("marker-end", "url(#arr)");
+        if (cur !== "overview") p.classList.add("is-dim");
+      }
+    });
+    renderPanel(s, mono);
+  }
+
+  let shownChanged = 0, shownConf = 0;
+  const tween = (elm, from, to) => {
+    if (RM || from === to) { elm.textContent = to; return; }
+    const t0 = performance.now(), dur = 600;
+    const step = now => { const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3); elm.textContent = Math.round(from + (to - from) * e); if (k < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  };
+
+  function renderPanel(s, mono) {
+    if (cur === "overview") {
+      panel.innerHTML = `
+        <div class="panel-head"><span class="k">${s.k}</span><h3>${s.q}</h3></div>
+        <div class="panel-body">
+          <p class="note"><b>Le principe :</b> pour savoir ce qui améliore un robot, on ne change qu'une brique à la fois. Tout le reste est figé.</p>
+          <p class="note"><b>Ce qui le permet :</b> les trois formats communs, en noir. Une brique qui les respecte se remplace sans toucher aux autres.</p>
+          <p class="note">Choisissez un scénario au-dessus du schéma, ou lancez la lecture automatique.</p>
+        </div>`;
+      shownChanged = 0; shownConf = 0;
+      return;
+    }
+    const total = IDS.length;
+    const nChanged = s.changed.length + (mono ? s.cascade.length : 0);
+    const conf = mono ? s.cascade.length : 0;
+    panel.innerHTML = `
+      <div class="panel-head"><span class="k">${s.k}</span><h3>${s.q}</h3></div>
+      <div class="panel-body">
+        <div class="pb-sec"><h4>Ce qui varie</h4><div class="varies">${esc(s.varies)}</div></div>
+        ${mono ? `<div class="warn">${esc(s.mono)}</div>` : `<div class="pb-sec"><h4>Ce qui reste fixe</h4><ul class="pb-list fixed">${s.fixedTxt.map(t => `<li>${esc(t)}</li>`).join("")}</ul></div>`}
+        <div class="pb-sec"><h4>Ce qu'on mesure</h4><div class="kchips">${s.measures.map(c => `<a class="kchip" href="#kpi-${c}" data-k="${c}"><b>${c}</b>${esc(KPI_BY[c].n)}</a>`).join("")}</div></div>
+        <div class="counter">
+          <div><span class="big ${mono ? "bad" : ""}"><span id="cA">${shownChanged}</span><span style="font-size:17px;color:var(--muted)"> / ${total}</span></span><span class="small">blocs modifiés</span></div>
+          <div><span class="big ${conf ? "bad" : ""}" id="cB">${shownConf}</span><span class="small">autres facteurs qui brouillent le résultat</span></div>
+        </div>
+      </div>`;
+    tween(document.getElementById("cA"), shownChanged, nChanged);
+    tween(document.getElementById("cB"), shownConf, conf);
+    shownChanged = nChanged; shownConf = conf;
+  }
+
+  function selectNode(id) {
+    IDS.forEach(i => nodeEls[i].g.classList.toggle("selected", i === id));
+    const n = N[id], box = document.getElementById("nodeDetail");
+    box.hidden = false;
+    box.innerHTML = `<div class="nd-top"><span class="nd-kind ${n.k}">${KIND_TXT[n.k]}</span><h4>${esc(n.t)}</h4></div><p>${esc(n.d)}</p>${n.o ? `<div class="opts">${n.o.map(x => `<span>${esc(x)}</span>`).join("")}</div>` : ""}`;
+  }
+
+  const setScenario = sc => {
+    cur = sc;
+    document.querySelectorAll(".sc-btn").forEach(x => x.setAttribute("aria-pressed", x.dataset.sc === sc));
+  };
+  const setMode = m => {
+    const changed = m !== mode; mode = m;
+    modeSw.classList.toggle("mono", m === "mono");
+    modeSw.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x.dataset.mode === m));
+    return changed;
+  };
+  document.querySelectorAll(".sc-btn").forEach(b => b.addEventListener("click", () => {
+    stopPlay();
+    setScenario(cur === b.dataset.sc ? "overview" : b.dataset.sc);
+    apply(mode === "mono");
+  }));
+  modeSw.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+    stopPlay();
+    const ch = setMode(b.dataset.mode);
+    if (cur === "overview") setScenario("camera");
+    apply(ch && mode === "mono");
+  }));
+
+  /* ---------- Bandeau photo ---------- */
+  const SHOTS = [
+    { img: "img/ur18.jpg", n: "01 · LE BRAS", big: "Bras UR18", sm: "Bras collaboratif 6 axes : la base fixe du banc.", tg: "BASE DU BANC", fx: true, node: "robot", alt: "Bras robotique UR18 au-dessus de la table de travail" },
+    { img: "img/prehenseur.jpg", n: "02 · LE PRÉHENSEUR", big: "Pince OnRobot 2FG7", sm: "Se remplace par une main Inspire ou un autre outil.", tg: "INTERCHANGEABLE", node: "robot", alt: "Pince OnRobot montée au poignet du bras, au-dessus des cubes" },
+    { img: "img/camera.jpg", n: "03 · LA VISION", big: "Caméra Femto Bolt", sm: "Vue de face : ce que voit le modèle. Se change sans toucher au modèle.", tg: "INTERCHANGEABLE", node: "cam", alt: "Caméra de profondeur Orbbec Femto Bolt sur trépied, posée sur la table" },
+    { img: "img/cubes.jpg", n: "04 · LA TÂCHE", big: "Cubes à trier", sm: "Mêmes cubes, mêmes positions de départ à chaque essai.", tg: "FIXE", fx: true, node: "proto", alt: "Cubes en bois marqués de lettres et de symboles, alignés sur la table" }
+  ];
+  const reel = document.getElementById("reel");
+  const shotHTML = (s, dup) => `<button class="shot" data-node="${s.node}"${dup ? ' tabindex="-1" aria-hidden="true"' : ""}>
+      <img src="${s.img}" alt="${dup ? "" : esc(s.alt)}" loading="lazy">
+      <span class="tg${s.fx ? " fx" : ""}">${s.tg}</span>
+      <span class="cap"><span class="n">${s.n}</span><span class="big">${esc(s.big)}</span><span class="sm">${esc(s.sm)}</span></span>
+    </button>`;
+  reel.innerHTML = [0, 1, 2, 3].map(r => SHOTS.map(s => shotHTML(s, r > 0)).join("")).join("");
+  reel.addEventListener("click", e => {
+    const b = e.target.closest(".shot"); if (!b) return;
+    stopPlay(); selectNode(b.dataset.node);
+    document.getElementById("schema").scrollIntoView({ behavior: RM ? "auto" : "smooth", block: "start" });
+  });
+  const GHOST = "UR18 · OnRobot 2FG7 · Caméras · Cubes · ";
+  document.getElementById("ghost").innerHTML = `<span>${GHOST}</span><span>${GHOST}</span>`;
+
+  /* ---------- Lecture automatique ---------- */
+  const playBtn = document.getElementById("play"), playBar = document.getElementById("playBar"), playFill = playBar.querySelector("i");
+  const SEQ = [];
+  ["camera", "vla", "collect", "train"].forEach(sc => { SEQ.push([sc, "mod"]); SEQ.push([sc, "mono"]); });
+  let playing = false, pi = 0, playTimer = null;
+  const STEP_MS = 4500;
+  function playStep() {
+    const [sc, m] = SEQ[pi];
+    setScenario(sc); const ch = setMode(m); apply(ch && m === "mono");
+    playFill.style.transition = "none"; playFill.style.width = "0";
+    void playFill.offsetWidth;
+    playFill.style.transition = `width ${STEP_MS}ms linear`; playFill.style.width = "100%";
+    pi = (pi + 1) % SEQ.length;
+    playTimer = setTimeout(playStep, STEP_MS);
+  }
+  function stopPlay() {
+    if (!playing) return;
+    playing = false; clearTimeout(playTimer);
+    playBtn.setAttribute("aria-pressed", "false"); playBtn.querySelector("span").textContent = "Lecture auto";
+    playBar.classList.remove("on");
+  }
+  playBtn.addEventListener("click", () => {
+    if (playing) { stopPlay(); return; }
+    playing = true; pi = 0;
+    playBtn.setAttribute("aria-pressed", "true"); playBtn.querySelector("span").textContent = "Pause";
+    playBar.classList.add("on"); playStep();
+  });
+  apply(false);
+})();
+</script>
+</body>
+</html>
